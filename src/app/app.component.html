@@ -22,7 +22,7 @@
                            (normalScreen)="exitFromFullScreen()"></vvc-full-screen-video>
     <div id="vvc-normal-container">
 
-      <vvc-top-bar [context]="appState"
+      <!--<vvc-top-bar [context]="appState"
                    *ngIf="!appState.cbnMode && !appState.inboundMode"
                    (onMinimize)="minimizeWidget()"
                    (onMaximize)="setFullScreen()"
@@ -31,7 +31,21 @@
                    (onRemove)="closeApp()"
                    (onHideChat)="hideChat()"
                    (onVideoUpgrade)="askForVideoUpgrade()"
-                   (onVoiceUpgrade)="askForVoiceUpgrade()"></vvc-top-bar>
+                   (onVoiceUpgrade)="askForVoiceUpgrade()"></vvc-top-bar>-->
+
+      <vvc-top-bar-turismo-torino [context]="appState"
+                  [interactionState]="interactionState"
+                   *ngIf="!appState.cbnMode && !appState.inboundMode && appState.isChatVisible"
+                   (onMinimize)="minimizeWidget()"
+                   (onMaximize)="setFullScreen()"
+                   (onClose)="closeContact(appState)"
+                   (onSurvey)="showSurvey()"
+                   (onRemove)="closeApp()"
+                   (onHideChat)="hideChat()"
+                   (onVideoUpgrade)="askForVideoUpgrade()"
+                   (onVoiceUpgrade)="askForVoiceUpgrade()"
+                   (onDebugConsole)="debugConsole()"
+                   (onStartRecording)="startRecording()"></vvc-top-bar-turismo-torino>
 
       <vvc-data-collection id="vvc-data-collection"
                            [context]="appState"
@@ -55,7 +69,7 @@
                  (muteToggle)="muteToggle($event)"
                  (hangUp)="hangUpCall()"></vvc-media>
 
-      <vvc-chat id="vvc-chat" [context]="appState" *ngIf="appState.isChatVisible">
+      <vvc-chat-turismo-torino id="vvc-chat" [context]="appState" *ngIf="appState.isChatVisible">
 
         <div class="vvc-emoji-panel">
           <vvc-emoji-panel class="vvc-emoji-inner"
@@ -103,7 +117,7 @@
 
         <div class="vvc-chat-box-area" *ngIf="appState.isChatBoxVisible">
           <vvc-chat-area #chat
-                         [readonly]="appState.isSendAreaDisabled"
+                         [readonly]="isSendAreaDisabled()"
                          [context]="appState"
                          (onSendText)="sendText($event, appState.showEmojiPanel)"
                          (toggleEmojiPanel)="toggleEmojiPanel()"
@@ -115,7 +129,7 @@
           <vvc-chat-is-writing [context]="appState"></vvc-chat-is-writing>
         </div>
 
-      </vvc-chat>
+      </vvc-chat-turismo-torino>
 
       <vvc-cbn id="vvc-cbn"
                *ngIf="appState.cbnMode"

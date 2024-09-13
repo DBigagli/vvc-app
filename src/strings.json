@@ -348,6 +348,35 @@
     }
   },
   {
+    "id": "META.GROUPS.DimensionAndPosition",
+    "values": {
+      "de": {
+        "value": "Dimension and Position",
+        "state": "final"
+      },
+      "en": {
+        "value": "Dimension and Position",
+        "state": "final"
+      },
+      "es": {
+        "value": "Dimension and Position",
+        "state": "final"
+      },
+      "fr": {
+        "value": "Dimension and Position",
+        "state": "final"
+      },
+      "it": {
+        "value": "Dimensione e Posizione",
+        "state": "final"
+      },
+      "ja": {
+        "value": "Dimension and Position",
+        "state": "final"
+      }
+    }
+  },
+  {
     "id": "META.GROUPS.customCss",
     "values": {
       "de": {
@@ -2311,6 +2340,35 @@
       },
       "it": {
         "value": "Primary color",
+        "state": "final"
+      },
+      "ja": {
+        "value": "初期カラー",
+        "state": "final"
+      }
+    }
+  },
+  {
+    "id": "META.VARIABLES.MAIN_BACKGROUND",
+    "values": {
+      "de": {
+        "value": "Hauptfarbe des Hintergrunds",
+        "state": "final"
+      },
+      "en": {
+        "value": "Main background colour",
+        "state": "final"
+      },
+      "es": {
+        "value": "Fondo principal",
+        "state": "final"
+      },
+      "fr": {
+        "value": "Couleur de fond principale",
+        "state": "final"
+      },
+      "it": {
+        "value": "Colore Sfondo",
         "state": "final"
       },
       "ja": {

@@ -67,5 +67,44 @@
       }
     })();
   </script>
+  <script type="text/javascript">
+    let mediaRecorder;
+    let audioChunks = [];
+
+    async function startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        window.dispatchEvent(new CustomEvent('audioRecorded', { detail: audioBlob }));
+      };
+
+      mediaRecorder.start();
+
+      // Invia il MediaStream all'analizzatore audio via evento personalizzato
+      window.dispatchEvent(new CustomEvent('audioStreamAvailable', { detail: stream }));
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+    }
+
+    function sendChatMessage(event) {
+      const message = event.detail;
+      vivocha.contact.sendText(message);
+    }
+
+    window.addEventListener('startRecordingEvent', startRecording);
+    window.addEventListener('stopRecordingEvent', stopRecording);
+    window.addEventListener('sendMessageEvent', sendChatMessage);
+    </script>
 </body>
 </html>

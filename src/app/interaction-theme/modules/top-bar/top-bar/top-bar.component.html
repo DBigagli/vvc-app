@@ -1,0 +1,72 @@
+<div id="vvc-top-bar">
+  <div id="vvc-top-avatar" *ngIf="context.topBarAvatar">
+    <img [src]="context.topBarAvatar">
+  </div>
+  <div id="vvc-top-header">
+    <div id="vvc-top-title">{{ context.topBarTitle | translate }}</div>
+    <div id="vvc-top-subtitle">{{ context.topBarSubtitle | translate }}</div>
+  </div>
+  <div class="vvc-top-controls" *ngIf="context.canRemoveApp && !context.incomingOffer">
+    <span (click)="removeApp()">
+      <i class="icon icon-vvc-close"></i>
+    </span>
+  </div>
+  <div class="vvc-top-controls" *ngIf="!hasMenu() && !context.canRemoveApp && !context.incomingOffer">
+    <span *ngIf="context.canMinimize" (click)="onMinimize.emit()">
+      <i class="icon icon-vvc-reduce"></i>
+    </span>
+    <span (click)="closeContact()">
+      <i class="icon icon-vvc-close"></i>
+    </span>
+  </div>
+  <div class="vvc-top-controls" *ngIf="hasMenu() && !context.canRemoveApp && !context.incomingOffer">
+    <span (click)="showMenu()">
+      <i class="icon icon-vvc-menu"></i>
+    </span>
+  </div>
+  <div id="vvc-top-bar-menu" *ngIf="isMenuVisible" (click)="closeMenu()">
+    <div id="vvc-menu-inner" class="animated" [ngClass]="{ 'fadeIn': isMenuVisible }">
+      <div *ngIf="context.isMediaMinimized && context.isMediaConnected && !context.isFullScreen" (click)="onHideChat.emit()">
+        <span><i class="icon icon-vvc-chat"></i> {{ 'STRINGS.QUEUE.TOPBAR.HIDE_CHAT_BUTTON' | translate }}</span>
+      </div>
+      <div *ngIf="context.canStartAudio" (click)="onVoiceUpgrade.emit()">
+        <span><i class="icon icon-vvc-audio"></i> {{ 'STRINGS.QUEUE.TOPBAR.VOICE_BUTTON' | translate }}</span>
+      </div>
+      <div *ngIf="context.canStartVideo && !context.isMediaConnected" (click)="onVideoUpgrade.emit()">
+        <span><i class="icon icon-vvc-video"></i> {{ 'STRINGS.QUEUE.TOPBAR.VIDEO_BUTTON' | translate }}</span>
+      </div>
+      <div *ngIf="context.canMinimize" (click)="onMinimize.emit()">
+        <span><i class="icon icon-vvc-reduce"></i> {{ 'STRINGS.QUEUE.TOPBAR.MINIMIZE_BUTTON' | translate }}</span>
+      </div>
+      <div (click)="closeContact()">
+        <span><i class="icon icon-vvc-close"></i> {{ 'STRINGS.QUEUE.TOPBAR.CLOSE_BUTTON' | translate }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="vvc-top-interaction-controls">
+  <span *ngIf="isIdle()" (click)="startRecording()">
+    <i class="status idle-status"></i>
+  </span>
+  <span *ngIf="isRecording()">
+    <i class="status recording-status"></i>
+  </span>
+  <span *ngIf="isProcessing()">
+    <div class="status processing-status">
+      <div class="circle circle1"></div>
+      <div class="circle circle2"></div>
+      <div class="circle circle3"></div>
+      <div class="circle circle4"></div>
+      <div class="circle circle5"></div>
+      <div class="circle circle6"></div>
+      <div class="circle circle7"></div>
+    </div>
+  </span>
+  <span *ngIf="isSpeaking()">
+    <div class="status speaking-status">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>  
+  </span>
+</div>

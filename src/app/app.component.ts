@@ -1,7 +1,8 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {VvcInteractionService, Dimension, UiState} from '@vivocha/client-interaction-core';
+import {VvcInteractionService, Dimension, UiState, VvcMessageService} from '@vivocha/client-interaction-core';
 import {ChatAreaComponent} from '@vivocha/client-interaction-layout';
 import {Observable, Subscription} from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 interface Dimensions {
   [key: string]: Dimension;
@@ -24,6 +25,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
   public closeModalVisible = false;
   public surveyVisible = false;
+
+  public interactionState: string;
+
+  private recorder: AudioRecorder;
+  // Single Use Token for Speech Transcription
+  private transcriptionToken : TranscriptionToken;
 
   private isMobile;
 
@@ -98,17 +105,36 @@ export class AppComponent implements OnInit, OnDestroy {
 
   public selector: string | null = null;
 
-  constructor(private interactionService: VvcInteractionService) {}
+  constructor(private interactionService: VvcInteractionService, private messagesService: VvcMessageService) {}
+
 
   ngOnInit() {
     this.appState$ = this.interactionService.getState();
     this.interactionService.init().subscribe(context => this.setInitialDimensions(context));
     this.interactionService.events().subscribe(evt => this.listenForEvents(evt));
 
+    // Initialize Custom Actions handlers
+    this.subscribeCustomActions();
+
     // listen to uiState changes in order to update the local reference used in services
     this.appUiStateSub = this.appState$.subscribe(uiState => {
       this.interactionService.setUiState(uiState);
     });
+
+    this.transcriptionToken = new TranscriptionToken();
+    this.interactionState = "Idle";
+
+    
+    const threshold = 0.05;
+    const silenceTime = 2000; 
+    this.recorder = new AudioRecorder(threshold, silenceTime);
+    this.recorder.onRecordingEnded = (transcription: string) => {
+      this.transcriptionToken.consumeToken();
+      this.interactionService.sendText(transcription);
+    };
+    this.recorder.onRecordingFailed = () => {
+      this.setInteractionState("Idle");
+    };
   }
   ngOnDestroy() {
     this.appUiStateSub.unsubscribe();
@@ -181,6 +207,9 @@ export class AppComponent implements OnInit, OnDestroy {
   dismissCloseModal() {
     this.closeModalVisible = false;
     this.interactionService.dismissCloseModal();
+  }
+  debugConsole() {
+    console.log("Heart Pressed!");
   }
   doUpload(upload) {
     this.interactionService.sendAttachment(upload);
@@ -409,4 +438,360 @@ export class AppComponent implements OnInit, OnDestroy {
       return false
     };
   }
+
+
+  setInteractionState(state: string) {
+    this.interactionState = state;
+    console.log("Interaction State: " + state);
+  }
+
+  startRecording() {
+    const token = this.transcriptionToken.getToken();
+    this.recorder.initializeAudio(token);
+
+    this.setInteractionState("Recording");
+  }
+
+
+  subscribeCustomActions() {
+    this.interactionService
+      .registerCustomAction({id: 'rawmessage'})
+      .pipe(filter((message: RawMessage) => message.type === 'action' && !!message.args))
+      .subscribe((message: RawMessage) => {
+        if (!!message.action_code) {
+          switch (message.action_code) {
+            case 'ReproduceAudio': {
+              let dataArray = [];
+
+               // Accedi al campo `data` di `message.args[0]`, che contiene i chunk
+              if (message.args[0] && Array.isArray(message.args[0].data)) {
+                // Ordina i chunk in base all'indice per garantire che siano nella sequenza corretta
+                const dataChunks = message.args[0].data;
+
+                // Concatena i dati di ciascun chunk in `dataArray`
+                dataChunks.forEach(chunk => {
+                    if (Array.isArray(chunk.data)) {
+                        dataArray = dataArray.concat(chunk.data);  // Unisce i chunk
+                    }
+                });
+              }
+
+              const audioData = new Uint8Array(dataArray);
+
+              const blob = new Blob([audioData], { type: 'audio/wav' });
+
+              const audioUrl = URL.createObjectURL(blob);
+
+              const audio = new Audio(audioUrl);
+
+              audio.addEventListener('ended', () => {
+                this.setInteractionState("Idle");
+              });
+
+              audio.play();
+            }
+            break;
+
+            case 'setIdleState':
+              this.setInteractionState("Idle");
+              break;
+
+            case 'setProcessingState':
+              this.setInteractionState("Processing");
+              break;
+
+            case 'setSpeakingState':
+              this.setInteractionState("Speaking");
+              break;
+
+            case 'setTranscriptionToken':
+              const token = message.args[0].token;
+
+              this.transcriptionToken.setToken(token);
+              break;
+          }
+        }
+      });
+  }
+
+  isSendAreaDisabled() : boolean {
+    switch (this.interactionState) {
+      case 'Idle':
+        return false;
+        
+      default:
+        return true;
+    }
+  }
+}
+
+interface RawMessage {
+  type: string;
+  args?: {
+    data?: any[];
+  };
+  action_code?: string;
+}
+
+class TranscriptionToken {
+  token: string;
+  used: boolean;
+
+  constructor() {
+    this.token = "";
+    this.used = true;
+  }
+
+  setToken(token: string) {
+    this.token = token;
+    this.used = false;
+  }
+
+  getToken() : string {
+    if (this.used === false) {
+      return this.token;
+    }
+    else {
+      return null;
+    }
+  }
+
+  consumeToken() : void {
+    this.used = true;
+  }
+}
+
+export class AudioRecorder {
+  threshold: number;
+  silenceTime: number;
+  silenceStartTime: number | null;
+  isRecording: boolean;
+  audioChunks: Blob[];
+  audioContext: AudioContext | null;
+  analyser: AnalyserNode | null;
+  dataArray: Uint8Array | null;
+  recordingTime: number;
+  transcriptionToken: string;
+  private eventListenersInitialized: boolean;
+
+  public onRecordingEnded?: (transcription: string) => void;
+  public onRecordingFailed?: () => void;
+
+  constructor(threshold: number, silenceTime: number) {
+    this.threshold = threshold;
+    this.silenceTime = silenceTime;
+    this.silenceStartTime = null;
+    this.isRecording = false;
+    this.audioChunks = [];
+    this.audioContext = null;
+    this.analyser = null;
+    this.dataArray = null;
+    this.eventListenersInitialized = false; 
+  }
+
+  async initializeAudio(transcriptionToken: string): Promise<void> {
+    this.silenceStartTime = null;
+    this.isRecording = false;
+    this.audioChunks = [];
+    this.transcriptionToken = transcriptionToken;
+
+    if (!this.eventListenersInitialized) {
+      // Aggiungi gli event handler solo una volta
+      window.addEventListener('audioRecorded', async (event: CustomEvent) => {
+        const audioBlob = event.detail as Blob;
+
+        // Converti WebM in WAV
+        const wavBlob = await webmToWav(audioBlob);
+
+        //const audioUrl = URL.createObjectURL(wavBlob);
+        // Stampa l'URL in console
+        //console.log("Audio URL: ", audioUrl);
+        
+        const formData = new FormData();
+        formData.append('audioData', wavBlob);
+        formData.append('token', this.transcriptionToken);
+        formData.append('projectId', "65b3b946ef3227405c31d6d3");
+        formData.append('googleVoiceName', "en-US-Standard-H");
+
+        const transcriptionUrl = "https://avatargpt.app.covisian.com/GetResponse/GetTranscription";
+        try {
+          const res = await fetch(transcriptionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: { }
+          });
+
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          const transcription = await res.text();
+          this.onRecordingEnded(capitalizeFirstLetter(transcription));
+        } catch (err) {
+          this.onRecordingFailed();
+        }
+      });
+
+      // Ascolta l'evento personalizzato per il flusso audio
+      window.addEventListener('audioStreamAvailable', (event: CustomEvent) => {
+        const stream = event.detail as MediaStream;
+        this.setupAudioAnalyser(stream);
+        this.checkVolume();
+      });
+
+      // Imposta il flag per evitare la registrazione multipla degli handler
+      this.eventListenersInitialized = true;
+    }
+
+    // Chiama direttamente startRecording per avviare la registrazione
+    this.startRecording();
+  }
+
+  setupAudioAnalyser(stream: MediaStream): void {
+    // Imposta l'AudioContext e l'AnalyserNode per monitorare il volume
+    this.audioContext = new AudioContext();
+    const source = this.audioContext.createMediaStreamSource(stream);
+    this.analyser = this.audioContext.createAnalyser();
+    this.analyser.fftSize = 2048;
+
+    const bufferLength = this.analyser.frequencyBinCount;
+    this.dataArray = new Uint8Array(bufferLength);
+
+    source.connect(this.analyser);
+  }
+
+  checkVolume(): void {
+    if (!this.analyser || !this.dataArray) return;
+
+    this.analyser.getByteTimeDomainData(this.dataArray);
+    let maxVal = 0;
+
+    // Trova il valore massimo nel buffer audio
+    for (let i = 0; i < this.dataArray.length; i++) {
+      maxVal = Math.max(maxVal, this.dataArray[i] / 128.0 - 1.0);
+    }
+
+    // Se il valore massimo è inferiore alla soglia
+    if (maxVal < this.threshold) {
+      if (!this.silenceStartTime) {
+        this.silenceStartTime = Date.now();
+      } else if (Date.now() - this.silenceStartTime > this.silenceTime) {
+        // Se il volume è troppo basso per troppo tempo, ferma la registrazione
+        this.stopRecording();
+        return;
+      }
+    } else {
+      this.silenceStartTime = null;  // Reset se non c'è silenzio
+    }
+
+    // Continua a monitorare il volume
+    requestAnimationFrame(() => this.checkVolume());
+  }
+
+  startRecording(): void {
+    if (!this.isRecording) {
+      this.isRecording = true;
+      this.recordingTime = Date.now();
+      window.dispatchEvent(new CustomEvent('startRecordingEvent'));
+    }
+  }
+
+  stopRecording(): void {
+    if (this.isRecording) {
+      this.isRecording = false;
+      const recordingEndTime = Date.now();
+      const recordingDuration = (recordingEndTime - this.recordingTime) / 1000;
+
+      window.dispatchEvent(new CustomEvent('stopRecordingEvent'));
+    }
+  }
+}
+
+function capitalizeFirstLetter(text: string): string {
+  if (!text) return text; // Verifica che la stringa non sia vuota o null
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as ArrayBuffer);
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
+async function webmToWav(webmBlob: Blob): Promise<Blob> {
+  try {
+    // Usa FileReader per leggere il Blob come ArrayBuffer
+    const arrayBuffer = await blobToArrayBuffer(webmBlob);
+    
+    // Creazione di un contesto audio per decodificare il WebM
+    const audioContext = new AudioContext();
+    
+    // Decodifica del file audio WebM
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+    // Creazione del WAV buffer
+    const wavBuffer = audioBufferToWav(audioBuffer);
+
+    // Creazione di un Blob in formato WAV
+    const wavBlob = new Blob([wavBuffer], { type: 'audio/wav' });
+    return wavBlob;
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Funzione per convertire l'audio buffer in WAV
+function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
+  const numOfChannels = buffer.numberOfChannels;
+  const length = buffer.length * numOfChannels * 2 + 44;
+  const result = new ArrayBuffer(length);
+  const view = new DataView(result);
+  const channels = [];
+  let offset = 0;
+  let pos = 0;
+
+  // Scrittura dell'intestazione WAV
+  setUint32(0x46464952); // "RIFF"
+  setUint32(length - 8); // Lunghezza del file meno l'intestazione
+  setUint32(0x45564157); // "WAVE"
+
+  setUint32(0x20746d66); // "fmt " chunk
+  setUint32(16); // Lunghezza del chunk
+  setUint16(1); // Audio format (PCM)
+  setUint16(numOfChannels); // Numero di canali
+  setUint32(buffer.sampleRate); // Sample rate
+  setUint32(buffer.sampleRate * 2 * numOfChannels); // Byte rate
+  setUint16(numOfChannels * 2); // Block align
+  setUint16(16); // Bit depth (16-bit)
+
+  setUint32(0x61746164); // "data" chunk
+  setUint32(length - pos - 4); // Lunghezza del data chunk
+
+  // Scrittura dei campioni audio
+  for (let i = 0; i < numOfChannels; i++) {
+    channels.push(buffer.getChannelData(i));
+  }
+
+  while (pos < length) {
+    for (let i = 0; i < numOfChannels; i++) {
+      const sample = Math.max(-1, Math.min(1, channels[i][offset])); // Normalizza tra -1 e 1
+      view.setInt16(pos, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+      pos += 2;
+    }
+    offset++;
+  }
+
+  function setUint16(data: number) {
+    view.setUint16(pos, data, true);
+    pos += 2;
+  }
+
+  function setUint32(data: number) {
+    view.setUint32(pos, data, true);
+    pos += 4;
+  }
+
+  return result;
 }

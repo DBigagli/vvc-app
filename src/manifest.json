@@ -1,5 +1,5 @@
 {
-  "id": "vvc-app",
+  "id": "vvc-app-turismo-torino",
   "type": "interaction",
   "variables": [
     {
@@ -97,7 +97,7 @@
       "nameId": "META.VARIABLES.APP.INITIAL_WIDTH",
       "defaultValue": "370px",
       "type": "unit",
-      "hidden": true,
+      "hidden": false,
       "categoryIds": [
         "General_DimensionAndPosition"
       ]
@@ -107,7 +107,7 @@
       "nameId": "META.VARIABLES.APP.INITIAL_HEIGHT",
       "defaultValue": "600px",
       "type": "unit",
-      "hidden": true,
+      "hidden": false,
       "categoryIds": [
         "General_DimensionAndPosition"
       ]
@@ -330,7 +330,7 @@
       "nameId": "META.VARIABLES.CHAT.BALLOON.VISITOR.COLOR",
       "defaultValue": "#E6E6E6",
       "type": "color",
-      "hidden": true,
+      "hidden": false,
       "categoryIds": [
         "Chat_Balloon_Visitor"
       ]
@@ -469,6 +469,16 @@
       "nameId": "META.VARIABLES.COLOR1",
       "defaultValue": "#0351A1",
       "type": "color",
+      "categoryIds": [
+        "General_Colors"
+      ]
+    },
+    {
+      "id": "mainBackground",
+      "nameId": "META.VARIABLES.MAIN_BACKGROUND",
+      "defaultValue": "#FFFFFF",
+      "type": "color",
+      "hidden": false,
       "categoryIds": [
         "General_Colors"
       ]

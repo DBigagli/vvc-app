@@ -1,0 +1,25 @@
+<div id="vvc-box-inner">
+  <div class="text-box">
+    <input [readonly]="readonly"
+           [placeholder]="'STRINGS.TEXTAREA.PLACEHOLDER' | translate"
+           type="text"
+           #box
+           (keyup)="isWriting()"
+           (keyup.enter)="sendText(box.value);box.value=''">
+  </div>
+  <div *ngIf="canShowUpload()"
+       (click)="showUpload()"
+       class="upload-handler">
+    <i class="icon icon-vvc-clip"></i>
+  </div>
+  <div *ngIf="context.variables.showEmojiButton"
+       (click)="toggleEmoji()"
+       class="emoji-handler">
+    <i class="icon icon-vvc-emoji"></i>
+  </div>
+  <div class="send-button" (click)="sendText(box.value);box.value='';box.focus()">
+    <div class="send-icon">
+      <i class="icon icon-vvc-send"></i>
+    </div>
+  </div>
+</div>

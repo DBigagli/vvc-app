@@ -1,12 +1,13 @@
 $appFontUrl: 'https://fonts.googleapis.com/css?family=Roboto:300,400';
 $appFontFamily: 'Roboto', sans-serif;
 
-$appWidth: 350px;
-$appHeight: 580px;
+// vvc-normal-container parameters
+$appWidth: 100%;
+$appHeight: 100%;
 $appMinimizedWidth: 80px;
 $appMinimizedHeight: 80px;
-$appBottomDistance: -5px;
-$appRightDistance: 40px;
+$appBottomDistance: 0px;
+$appRightDistance: 0px;
 
 
 //$icon-vvc-reduce: './assets/static/icons/vvc-reduce.png';
@@ -41,6 +42,11 @@ $icon-survey-heart-on: './assets/static/icons/heart-on.png';
 $icon-survey-heart-off: './assets/static/icons/heart-off.png';
 $icon-survey-smile-on: './assets/static/icons/smile-on.png';
 $icon-survey-smile-off: './assets/static/icons/smile-off.png';
+
+// Recording Status Variables
+$pulseSize: 10px;
+$red: rgba(226, 0, 24, 1);
+$transparentRed: rgba(226, 0, 24,0);
 
 /**
   MIXINS
@@ -205,10 +211,11 @@ $icon-survey-smile-off: './assets/static/icons/smile-off.png';
     color: #CCCCCC;
   }
 }
-@mixin top-bar($background: $color1, $titleColor: #FFFFFF, $titleSize: 18px, $subtitleColor: #FFFFFF, $subtitleSize: 12px, $showTopAvatar: $showAvatar){
+
+@mixin top-bar($background: $color1, $titleColor: #1a1a1a, $titleSize: 18px, $subtitleColor: #1a1a1a, $subtitleSize: 12px, $showTopAvatar: $showAvatar){
 
   flex: none;
-  background: $background;
+  //background: $background;
   color: $titleColor;
   /*padding: 8px 10px 8px 20px;*/
   padding: 12px 16px 12px 12px;
@@ -287,6 +294,12 @@ $icon-survey-smile-off: './assets/static/icons/smile-off.png';
       background: url($icon-vvc-chat);
       background-position: center;
     }
+
+    // Add More Icons Here...
+    &.icon-survey-heart-off {
+      background: url($icon-survey-heart-off);
+      background-position: center;
+    }
   }
 
   #vvc-top-bar-menu {
@@ -324,6 +337,167 @@ $icon-survey-smile-off: './assets/static/icons/smile-off.png';
     }
   }
 }
+
+@mixin top-interaction-controls($background: $color1, $subtitleColor: #1a1a1a, $subtitleSize: 12px, $showTopAvatar: $showAvatar){
+
+  display: flex;
+  flex-direction: row;
+  padding: 12px 16px 12px 12px;
+  height: 64px;
+  justify-content: center;
+
+  .status {
+    display: inline-block;
+
+    &.idle-status {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: $red;
+      box-shadow: 0 0 0 $red;
+      cursor: pointer;
+    }
+    &.idle-status:active {
+      transform: scale(1.1);
+    }
+    &.recording-status {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: $red;
+      box-shadow: 0 0 0 $red;
+      animation: pulsing 2s infinite;
+      transition: all 0.1s;
+    }
+    &.processing-status {
+      position: relative;
+      width: 100px;
+      height: 40px;
+    }
+    &.speaking-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 50px;
+      height: 40px;
+    }
+
+    @keyframes pulsing {
+      from {
+        box-shadow: 0 0 0 0 $red;
+      }
+      70% {
+        box-shadow: 0 0 0 $pulseSize $transparentRed;
+      }
+      to {
+        box-shadow: 0 0 0 0 $transparentRed;
+      }
+    }
+  }
+
+  .circle {
+    position: absolute;
+    background-color: #59c4ed; 
+    border-radius: 50%;
+    animation: move 3s infinite ease-in-out;
+
+    &.circle1 {
+      width: 40px;
+      height: 40px;
+      top: 4px;
+      left: 20px;
+    }
+    
+    &.circle2 {
+        width: 32px;
+        height: 32px;
+        top: 8px;
+        left: 8px;
+        animation-delay: -1s;
+    }
+    
+    &.circle3 {
+        width: 24px;
+        height: 24px;
+        top: 16px;
+        left: 44px;
+        animation-delay: -2s;
+    }
+    
+    &.circle4 {
+        width: 20px;
+        height: 20px;
+        top: 20px;
+        left: 32px;
+        animation-delay: -3s;
+    }
+    
+    &.circle5 {
+        width: 34px;
+        height: 34px;
+        top: 9px;
+        left: 50px;
+        animation-delay: -4s;
+    }
+    
+    &.circle6 {
+        width: 23px;
+        height: 23px;
+        top: 2px;
+        left: 36px;
+        animation-delay: -2.5s;
+    }
+    
+    &.circle7 {
+        width: 16px;
+        height: 16px;
+        top: 5px;
+        left: 48px;
+        animation-delay: -3.5s;
+    }
+  }
+  
+  @keyframes move {
+      0%, 100% {
+          transform: translate(0, 0);
+      }
+      50% {
+          transform: translate(4px, -4px);
+      }
+  }
+
+  .line {
+      width: 15px;
+      background-color: #f39801;
+      animation: animate 1.5s infinite ease-in-out;
+      border-radius: 20px;
+  }
+
+  .line:nth-child(1) {
+      height: 28px;
+      animation-delay: 0.1s;
+  }
+
+  .line:nth-child(2) {
+      height: 38px;
+      animation-delay: 0.2s;
+  }
+
+  .line:nth-child(3) {
+      height: 28px;
+      animation-delay: 0.3s;
+  }
+
+  @keyframes animate {
+      0%, 100% {
+          transform: scaleY(1);
+      }
+      50% {
+          transform: scaleY(1.1);
+      }
+  }
+}
+
 @mixin emoji-panel(){
   margin: 40px;
   padding: 8px;
@@ -1360,7 +1534,7 @@ $icon-survey-smile-off: './assets/static/icons/smile-off.png';
     }
   }
 }
-@mixin chat-visitor-message($background: $visitorBalloonColor, $color: #333333, $radius: 6px, $borderColor: #E6E6E6, $showAvatar: $showVisitorAvatar, $showArrow: $showVisitorBalloonArrow, $showAcks: $showAcks, $alignAvatar: $agentBalloonAvatarAlignment){
+@mixin chat-visitor-message($background: $visitorBalloonColor, $color: #333333, $radius: 6px, $borderColor: $visitorBalloonColor, $showAvatar: $showVisitorAvatar, $showArrow: $showVisitorBalloonArrow, $showAcks: $showAcks, $alignAvatar: $agentBalloonAvatarAlignment){
   .chat-message{
     &.visitor{
       .message-avatar{
@@ -1484,7 +1658,7 @@ $icon-survey-smile-off: './assets/static/icons/smile-off.png';
   }
   */
 }
-@mixin chat-agent-message($background: $color1, $color: #FFFFFF, $radius: 6px, $borderColor: $color1, $showAvatar: $showAgentAvatar, $showArrow: $showAgentBalloonArrow, $alignAvatar: $agentBalloonAvatarAlignment){
+@mixin chat-agent-message($background: transparent, $color: #1a1a1a, $radius: 6px, $borderColor: transparent, $showAvatar: $showAgentAvatar, $showArrow: $showAgentBalloonArrow, $alignAvatar: $agentBalloonAvatarAlignment){
 
   .chat-message{
     &.agent{
@@ -1805,14 +1979,17 @@ $icon-survey-smile-off: './assets/static/icons/smile-off.png';
     }
   }
 }
-@mixin chat-box-area($background: #FFFFFF, $textBoxBorder: #CCCCCC, $fontColor: #000000, $fontSize: 12px, $sendButtonBackground: $color1){
+@mixin chat-box-area($background: #FFFFFF, $textBoxBorder: #CCCCCC, $fontColor: #000000, $fontSize: 12px, $sendButtonBackground: $color1, $showUploadHandler: false, $showEmojiHandler: false){
   flex: none;
-  background: $background;
+  //background: $background;
+  padding: 10px;
+
   #vvc-box-inner{
     display: flex;
     margin: 14px 8px;
     border: 1px solid $textBoxBorder;
     border-radius: 30px;
+    background: #FFFFFF;
     .text-box{
       flex: auto;
       margin: auto;
@@ -1826,6 +2003,9 @@ $icon-survey-smile-off: './assets/static/icons/smile-off.png';
       }
     }
     .upload-handler{
+      @if ($showUploadHandler==false){
+        display: none;
+      }
       padding-top: 3px;
       cursor: pointer;
       flex: none;
@@ -1836,6 +2016,9 @@ $icon-survey-smile-off: './assets/static/icons/smile-off.png';
       }
     }
     .emoji-handler{
+      @if ($showEmojiHandler==false){
+        display: none;
+      }
       padding-top: 3px;
       cursor: pointer;
       flex: none;
@@ -1976,7 +2159,7 @@ $icon-survey-smile-off: './assets/static/icons/smile-off.png';
 @mixin border-and-shadow(){
   overflow: hidden;
   box-shadow: 0 0 10px #ccc;
-  margin: 10px;
+  margin: 0px;
 }
 @mixin minimized(){
   display: block;
@@ -2018,7 +2201,7 @@ $icon-survey-smile-off: './assets/static/icons/smile-off.png';
 body, input, textarea{ font-family: $appFontFamily; }
 #vvc-fullscreen-container {
   #vvc-loading-panel{
-    @include top-round();
+    //@include top-round();
     @include border-and-shadow();
     @include loading-panel();
   }
@@ -2027,18 +2210,24 @@ body, input, textarea{ font-family: $appFontFamily; }
     @include close-modal();
   }
   #vvc-normal-container {
-    @include top-round();
+    //@include top-round();
     @include border-and-shadow();
 
     width: $appWidth;
     height: $appHeight;
 
-    background: white;
+    background: $mainBackground;
     display: flex;
     flex-direction: column;
+    position: fixed;
+    right: 0;
+    bottom: 0;
 
     #vvc-top-bar {
       @include top-bar();
+    }
+    #vvc-top-interaction-controls {
+      @include top-interaction-controls();
     }
     #vvc-survey,
     #vvc-recontact,
@@ -2048,7 +2237,7 @@ body, input, textarea{ font-family: $appFontFamily; }
     }
     #vvc-queue {
       flex: auto;
-      @include queue();
+      @include queue($loadingColor: #1A1A1A);
     }
     #vvc-media {
       flex: auto;
@@ -2064,9 +2253,11 @@ body, input, textarea{ font-family: $appFontFamily; }
       }
     }
     #vvc-chat {
-      flex: auto;
+      //flex: auto;
       display: flex;
       flex-direction: column;
+      height: 100%;
+
       #vvc-emoji-panel {
         @include emoji-panel();
       }
@@ -2081,6 +2272,8 @@ body, input, textarea{ font-family: $appFontFamily; }
         overflow-y: scroll;
         padding-top: 20px;
         padding-bottom: 20px;
+        margin-right: 5px;
+        margin-left: 5px;
         @include system-message();
         @include chat-message();
         @include chat-agent-message();
@@ -2090,11 +2283,25 @@ body, input, textarea{ font-family: $appFontFamily; }
         @include template-message();
         @include template-list-message();
       }
+      /* Per Webkit (Chrome, Safari, Edge) */
+      #vvc-messages::-webkit-scrollbar {
+        width: 8px;
+      }
+      #vvc-messages::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+      #vvc-messages::-webkit-scrollbar-thumb {
+        background-color: #929292;
+        border-radius: 10px;
+      }
+      #vvc-messages::-webkit-scrollbar-button {
+        display: none; /* Rimuove le freccette */
+      }
       #vvc-is-writing {
         @include chat-is-writing();
       }
       #vvc-chat-box-area {
-        @include chat-box-area();
+        @include chat-box-area($sendButtonBackground: #1a1a1a);
       }
     }
     #vvc-cbn {

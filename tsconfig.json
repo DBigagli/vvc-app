@@ -12,7 +12,7 @@
     "importHelpers": true,
     "target": "es6",
     "typeRoots": [
-      "node_modules/@types"
+      "node_modules/@types", "src/types"
     ],
     "lib": [
       "es2018",

@@ -2,8 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app-ie",
-    "target": "es3",
-    "types": []
+    "target": "es5",
+    "types": ["dom-mediacapture-record"]
   },
   "files": [
     "src/main.ts",
