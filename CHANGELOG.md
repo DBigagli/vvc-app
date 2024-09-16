@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [7.11.2](https://github.com/vivocha/vvc-app/compare/@vivocha/client-interaction@7.11.1...@vivocha/client-interaction@7.11.2) (2024-09-16)
+
+
+### Bug Fixes
+
+* **chat:** disable message grouping based on showAgentAvatarInAllMessages var ([619404b](https://github.com/vivocha/vvc-app/commit/619404b128f7823f9f0e4665823e7c7aa2ee712e))
+* **css:** arrow bottom alignment ([7a60cdc](https://github.com/vivocha/vvc-app/commit/7a60cdc5f0a841c531a8e41a8597f5175bf74c3e))
+* **quick-reply:** configuration for behaviour on reply without interacting on it ([3a8bb7f](https://github.com/vivocha/vvc-app/commit/3a8bb7f9e6ea893fe2b1904035082bc3181b83c4))
+* **quick-reply:** configuration for hide body when empty ([a6113fe](https://github.com/vivocha/vvc-app/commit/a6113fe089b4f2c00f301aabb52aa5a9f78661f3))
+* **quick-reply:** display body as normal chat message if showQuickRepliesAsBalloon ([5d0ef4d](https://github.com/vivocha/vvc-app/commit/5d0ef4d10575630c32c05d97ca4fb56f778a052a))
+* **strings:** add missing keyword and new one for avatar alignment ([8821c9e](https://github.com/vivocha/vvc-app/commit/8821c9ed4d76eb292c95675def7e37276c8d1bcf))
+* **variables:** managing avatar alignment var ([4390340](https://github.com/vivocha/vvc-app/commit/4390340e676dd0e08c8acc52c199261ac7441ae2))
+
+
+
+
+
 ## [7.11.1](https://github.com/vivocha/vvc-app/compare/@vivocha/client-interaction@7.11.0...@vivocha/client-interaction@7.11.1) (2024-09-04)
 
 **Note:** Version bump only for package @vivocha/client-interaction
