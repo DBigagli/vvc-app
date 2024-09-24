@@ -1,6 +1,6 @@
 {
   "name": "@vivocha/client-interaction",
-  "version": "7.11.2",
+  "version": "7.11.3",
   "private": true,
   "description": "Vivocha Interaction Application",
   "scripts": {
@@ -78,7 +78,7 @@
     "@ngrx/store-devtools": "^8.5.1",
     "@ngx-translate/core": "^11.0.1",
     "@ngx-translate/http-loader": "^4.0.0",
-    "@vivocha/client-interaction-core": "7.10.2",
+    "@vivocha/client-interaction-core": "7.10.3",
     "@vivocha/client-interaction-layout": "7.7.1",
     "@vivocha/public-entities": "^7.1.3",
     "autolinker": "^1.6.2",
